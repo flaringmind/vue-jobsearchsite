@@ -14,7 +14,7 @@
           </p>
           <RouterLink
               to="/jobs"
-              class="inline-block bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-700"
+              class="inline-block bg-green-500 text-white rounded-lg px-4 py-2 hover:bg-gray-700"
           >
             Browse Jobs
           </RouterLink>
