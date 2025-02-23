@@ -35,7 +35,7 @@
         </div>
         <p
             @click="toggleFullDescription"
-            class="text-orange-400 hover:text-orange-700 underline mb-5"
+            class="text-orange-400 hover:text-orange-700 underline mb-5 cursor-pointer"
         >
           {{ showFullDescription ? 'Show less' : 'Show more' }}
         </p>
