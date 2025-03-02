@@ -2,7 +2,7 @@
 import {RouterLink} from "vue-router";
 import {reactive} from "vue";
 import {useToast} from "vue-toastification";
-import axios from "axios";
+import apiClient from "axios";
 import router from "@/router/index.js";
 
 const form = reactive({
@@ -19,7 +19,30 @@ const form = reactive({
   }
 })
 
+const errors = reactive({
+  title: '',
+  description: '',
+  salary: '',
+  location: '',
+  'company.name': '',
+  'company.description': '',
+  'company.contactEmail': '',
+})
+
 const toast = useToast();
+
+const clearErrors = () => {
+    errors.title = ''
+    errors.content = ''
+}
+
+const handleServerValidationErrors = (serverErrors) => {
+    clearErrors()
+
+    for (const field in serverErrors) {
+        errors[field] = serverErrors[field][0]
+    }
+}
 
 const handleSumbit = async () => {
   const newJob = {
@@ -36,11 +59,13 @@ const handleSumbit = async () => {
     }
   }
   try {
-    const response = await axios.post('/api/jobs', newJob);
+    const response = await apiClient.post('/api/jobs', newJob);
+    clearErrors();
     toast.success('Job has been successfully added');
     router.push(`/jobs/${response.data.id}`);
   } catch (error) {
-    console.error('Post request failed', error);
+    handleServerValidationErrors(error.response.data.errors);
+    console.error('Post request failed', error.response.data.errors);
     toast.error('Job was not added');
   }
 }
@@ -87,7 +112,9 @@ const handleSumbit = async () => {
                 v-model="form.title"
                 required
             />
+            <div class="error" v-if="errors.title">{{ errors.title }}</div>
           </div>
+
           <div class="mb-4">
             <label
                 for="description"
@@ -102,6 +129,7 @@ const handleSumbit = async () => {
                 rows="4"
                 placeholder="Add any job duties, expectations, requirements, etc"
             ></textarea>
+            <div class="error" v-if="errors.description">{{ errors.description }}</div>
           </div>
 
           <div class="mb-4">
@@ -127,6 +155,7 @@ const handleSumbit = async () => {
               <option value="$175K - $200K">$175 - $200K</option>
               <option value="Over $200K">Over $200K</option>
             </select>
+            <div class="error" v-if="errors.salary">{{ errors.salary }}</div>
           </div>
 
           <div class="mb-4">
@@ -142,6 +171,7 @@ const handleSumbit = async () => {
                 placeholder="Company Location"
                 required
             />
+            <div class="error" v-if="errors.location">{{ errors.location }}</div>
           </div>
 
           <h3 class="text-2xl mb-5">Company Info</h3>
@@ -158,6 +188,7 @@ const handleSumbit = async () => {
                 class="border rounded w-full py-2 px-3"
                 placeholder="Company Name"
             />
+            <div class="error" v-if="errors['company.name']">{{ errors['company.name'] }}</div>
           </div>
 
           <div class="mb-4">
@@ -174,6 +205,7 @@ const handleSumbit = async () => {
                 rows="4"
                 placeholder="What does your company do?"
             ></textarea>
+            <div class="error" v-if="errors['company.description']">{{ errors['company.description'] }}</div>
           </div>
 
           <div class="mb-4">
@@ -191,7 +223,9 @@ const handleSumbit = async () => {
                 placeholder="Email address for applicants"
                 required
             />
+            <div class="error" v-if="errors['company.contactEmail']">{{ errors['company.contactEmail'] }}</div>
           </div>
+
           <div class="mb-4">
             <label
                 for="contact_phone"
@@ -206,8 +240,7 @@ const handleSumbit = async () => {
                 class="border rounded w-full py-2 px-3"
                 placeholder="Optional phone for applicants"
             />
-          </div>
-
+          </div>          
           <div>
             <button
                 class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline"
@@ -222,6 +255,9 @@ const handleSumbit = async () => {
   </section>
 </template>
 
-<style lang="scss" scoped>
-
+<style scoped>
+  .error {
+      color: red;
+      font-size: 0.875rem;
+  }
 </style>
